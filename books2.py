@@ -22,11 +22,22 @@ class Book:
 
 
 class BookRequest(BaseModel):
-    id: Optional[int] = None
+    id: Optional[int] = Field(description="ID is not needed on create", default=None)
     title: str = Field(min_length=3)
     author: str = Field(min_length=1)
     description: str = Field(min_length=1, max_length=100)
     rating: int = Field(gt=-1, lt=6)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "title": "A new book",
+                "author": "John author",
+                "description": "A new book description",
+                "rating": 5
+            }
+        }
+    }
 
 
 BOOKS = [
@@ -42,6 +53,13 @@ BOOKS = [
 @app.get("/books")
 async def get_all_books():
     return BOOKS
+
+
+@app.get("/books/{book_id}")
+async def read_book(book_id: int):
+    for book in BOOKS:
+        if book.id == book_id:
+            return book
 
 
 @app.post("/create-book")
